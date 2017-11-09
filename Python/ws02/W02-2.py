@@ -21,22 +21,22 @@ for j in range(0,len(oni)):
     if oni['ANOM'][j] > 2:
         #print("verystrong")
         vs=vs+1
-    elif oni['ANOM'][j] >1.5:
+    elif oni['ANOM'][j] <= 1.9:
         #print("strong")
         s=s+1
-    elif oni['ANOM'][j] >1:
+    elif oni['ANOM'][j] <= 1.4:
         #print("medium")
         m=m+1
-    elif oni['ANOM'][j] >0.5:
+    elif oni['ANOM'][j] <= 0.9:
         #print("weak")
         w=w+1
     elif oni['ANOM'][j] < (-2):
         vsni=vsni+1
-    elif oni['ANOM'][j] < (-1.5):
+    elif oni['ANOM'][j] >= (-1.9):
         sni=sni+1
-    elif oni['ANOM'][j] < (-1):
+    elif oni['ANOM'][j] >= (-1.4):
         mni=mni+1
-    elif oni['ANOM'][j] < (-0.5):
+    elif oni['ANOM'][j] >= (-0.9):
         wni=wni+1
 print("EL NINO : very strong:",vs,"strong:",s,"medium:",m,"weak:",w)
 print( "EL NINA : very strong", vsni,"strong:",sni,"medium:",mni,"weak:",wni)
