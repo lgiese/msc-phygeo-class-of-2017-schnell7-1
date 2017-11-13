@@ -1,0 +1,36 @@
+---
+title: "gisW02-1"
+author: "Laura Giese, Alena Schmid, Johannes Schnell"
+date: "13 November 2017"
+output: html_document
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+
+```{r, echo = TRUE}
+Table=data.frame(c("Heterogenität", "Höhe des Kronendachs", "Dichte der Unterschicht", "Kronendeckung/-dichte", "Erhebung", "Terrain Ruggedness", "Hydrologie" ), 
+                 c("Punktdichte", "1.Response", "unterhalb 1.Response bis last Response", "1. Response und Punktdichte", "last Response", "last Response", "last response"), 
+                 c("1m","1m","1m","1m","1m", "1m", "1m"))
+colnames(Table)<-c("Structural Attribute", "Response", "Spatial Scale")                  
+View(Table)
+```
+
+
+```{r, echo=TRUE}
+#install.packages("png", dependencies=TRUE)
+library("png")
+
+setwd("C:/Users/Laura/Documents/Uni/Geoinformationssysteme")
+img <- readPNG("plan_s.png")
+plot(1:1, type='n', xaxt="n", yaxt="n", xlab="", ylab = "")
+
+lim <- par()
+rasterImage(img, lim$usr[1], lim$usr[3], lim$usr[2], lim$usr[4])
+```
