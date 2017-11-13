@@ -19,7 +19,7 @@ Table=data.frame(c("Heterogenität", "Höhe des Kronendachs", "Dichte der Untersch
                  c("Punktdichte", "1.Response", "unterhalb 1.Response bis last Response", "1. Response und Punktdichte", "last Response", "last Response", "last response"), 
                  c("1m","1m","1m","1m","1m", "1m", "1m"))
 colnames(Table)<-c("Structural Attribute", "Response", "Spatial Scale")                  
-View(Table)
+print(Table)
 ```
 
 
@@ -34,3 +34,8 @@ plot(1:1, type='n', xaxt="n", yaxt="n", xlab="", ylab = "")
 lim <- par()
 rasterImage(img, lim$usr[1], lim$usr[3], lim$usr[2], lim$usr[4])
 ```
+Probleme:
+1. Boden wird nicht überall erreicht
+2. Last response nicht immer = Boden (auch Steine etc.)
+3. Lücken im Kronendach auch bei Sträuchern, nicht nur bei Boden
+4. Wenn Kronendach sehr dicht, keine Responses unterhalb des Kronendachs
