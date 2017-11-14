@@ -1,0 +1,15 @@
+---
+title: "Untitled"
+author: "Johannes Schnell /ohne Gruppe"
+date: "14 November 2017"
+output: html_document
+---
+```{r}
+getwd()
+setwd("/home/hans/")
+eins = readRDS(file = "neuetab1.RDS")
+zwei = readRDS(file = "neuetab2.RDS")
+head(eins)
+head(zwei)
+
+```
