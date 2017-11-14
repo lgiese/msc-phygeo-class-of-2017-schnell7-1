@@ -125,17 +125,48 @@ $(document).ready(function () {
 
 
 <pre class="r"><code>getwd()</code></pre>
-<pre><code>## [1] &quot;/home/hans/Dokumente/UniMR&quot;</code></pre>
+<pre><code>## [1] &quot;/home/hans/Dokumente/UniMR/GIT/Datenanalyse/daws-04-1&quot;</code></pre>
 <pre class="r"><code>setwd(&quot;/home/hans/&quot;)
 eins = readRDS(file = &quot;neuetab1.RDS&quot;)
 zwei = readRDS(file = &quot;neuetab2.RDS&quot;)
+lfun = function(x){
+  x=as.character(x)
+  return(x)
+}
+
+eins[,3:5] = sapply(eins[,3:5], lfun)
+zwei[,3:5] = sapply(zwei[,3:5], lfun)
+
+
+
+
+
+for (i in 1:dim(eins)[1]){
+  if (eins[i,5] == &quot; Kreisfreie Stadt&quot;){
+    eins[i,4] -&gt; eins[i,5]
+    eins[i,4] &lt;- &quot; Kreisfreie Stadt&quot;
+    
+  } else{
+    #print(&quot;peng&quot;)
+  }
+}
+for (i in 1:dim(zwei)[1]){
+  if (zwei[i,5] == &quot; Kreisfreie Stadt&quot;){
+    zwei[i,4] -&gt; zwei[i,5]
+    zwei[i,4] &lt;- &quot; Kreisfreie Stadt&quot;
+    
+  } else{
+    #print(&quot;peng&quot;)
+  }
+}
+
 head(eins)</code></pre>
 <pre><code>##   Jahr   PLZ                Place        Admin_unit        Admin_misc
 ## 1 2015    DG          Deutschland                                    
 ## 2 2015    01   Schleswig-Holstein                                    
 ## 3 2015 01001            Flensburg  Kreisfreie Stadt                  
-## 4 2015 01002                 Kiel  Landeshauptstadt  Kreisfreie Stadt
-## 5 2015 01003               Lübeck        Hansestadt  Kreisfreie Stadt
+## 4 2015 01002                 Kiel  Kreisfreie Stadt  Landeshauptstadt
+## 5 2015 01003               Lübeck  Kreisfreie Stadt        Hansestadt
 ## 6 2015 01004           Neumünster  Kreisfreie Stadt                  
 ##   Winterweizen Roggen.und.Wintermenggetreide Wintergerste Sommergerste
 ## 1         81.5                          56.6         76.9         54.2
@@ -156,8 +187,8 @@ head(eins)</code></pre>
 ## 1 1996    DG          Deutschland                                    
 ## 2 1996    01   Schleswig-Holstein                                    
 ## 3 1996 01001            Flensburg  Kreisfreie Stadt                  
-## 4 1996 01002                 Kiel  Landeshauptstadt  Kreisfreie Stadt
-## 5 1996 01003               Lübeck        Hansestadt  Kreisfreie Stadt
+## 4 1996 01002                 Kiel  Kreisfreie Stadt  Landeshauptstadt
+## 5 1996 01003               Lübeck  Kreisfreie Stadt        Hansestadt
 ## 6 1996 01004           Neumünster  Kreisfreie Stadt                  
 ##   Anteil.Siedlungs..und.Verkehrsfläche.an.Gesamtfl.
 ## 1                                              11.8

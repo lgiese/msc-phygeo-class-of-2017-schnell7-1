@@ -9,6 +9,37 @@ getwd()
 setwd("/home/hans/")
 eins = readRDS(file = "neuetab1.RDS")
 zwei = readRDS(file = "neuetab2.RDS")
+lfun = function(x){
+  x=as.character(x)
+  return(x)
+}
+
+eins[,3:5] = sapply(eins[,3:5], lfun)
+zwei[,3:5] = sapply(zwei[,3:5], lfun)
+
+
+
+
+
+for (i in 1:dim(eins)[1]){
+  if (eins[i,5] == " Kreisfreie Stadt"){
+    eins[i,4] -> eins[i,5]
+    eins[i,4] <- " Kreisfreie Stadt"
+    
+  } else{
+    #print("peng")
+  }
+}
+for (i in 1:dim(zwei)[1]){
+  if (zwei[i,5] == " Kreisfreie Stadt"){
+    zwei[i,4] -> zwei[i,5]
+    zwei[i,4] <- " Kreisfreie Stadt"
+    
+  } else{
+    #print("peng")
+  }
+}
+
 head(eins)
 head(zwei)
 
