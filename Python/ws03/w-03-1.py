@@ -66,19 +66,22 @@ c = ["Hans", "Wurst", "hans", "Apfel", "Äpfel", "äpfe", "äpfel"]
 
 #einmal mit while
 def sortwhile(x):
-    for k in reversed(range(1,len(x))):
+    tmpx = x[:]
+    for k in reversed(range(1,len(tmpx))):
         for i in range(k):
-            while x[i] > x[i+1]:
-                x[i+1], x[i] = x[i], x[i+1]
-    return(x)
+            while tmpx[i] > tmpx[i+1]:
+                tmpx[i+1], tmpx[i] = tmpx[i], tmpx[i+1] 
+    return(tmpx)
+    
 
 #einmal mit if 
 def sortif(x):
-    for k in reversed(range(1,len(x))):
+    tmpx = x[:]
+    for k in reversed(range(1,len(tmpx))):
         for i in range(k):
-            if x[i] > x[i+1]:
-                x[i+1], x[i] = x[i], x[i+1] 
-    return(x)
+            if tmpx[i] > tmpx[i+1]:
+                tmpx[i+1], tmpx[i] = tmpx[i], tmpx[i+1] 
+    return(tmpx)
 
 
 b= [5,3,8,1,10,7,2 , 4, 5, 1, 7, 8, 4, 6, 5]
