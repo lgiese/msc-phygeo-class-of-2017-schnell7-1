@@ -62,9 +62,10 @@ def sort2(x):
         else:
             tmpgr.append(tmpx[0+i])
     tmpxr = tmpkl + tmpgr
-    for i in range(len(tmpxr)-1):
-        if tmpxr[i] > tmpxr[i+1]:
-            tmpxr[i+1], tmpxr[i] = tmpxr[i], tmpxr[i+1]
+    for k in reversed(range(1,len(tmpx))):
+        for i in range(k):
+            if tmpxr[i] > tmpxr[i+1]:
+                tmpxr[i+1], tmpxr[i] = tmpxr[i], tmpxr[i+1]
     return tmpxr
 
 
@@ -84,5 +85,14 @@ t5 = time.clock()
 sort2(ccx)
 t6 = time.clock()
 print("sort2", t6-t5)    
-    
 
+#test auf gleichheit muss TRUE sein
+sortif(ccx) == sort(ccx) == sort2(ccx)
+
+
+####
+#sort 4.352273
+#sortif 0.163659
+#sort2 0.13845499999999955      
+#True                           
+################################
