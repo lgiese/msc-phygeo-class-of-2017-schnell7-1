@@ -1,0 +1,56 @@
+---
+title: "W04-2"
+author: "Laura Giese, Johannes Schnell"
+date: "1 Dezember 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, echo = TRUE, eval = FALSE}
+#install.packages("glcm")
+library(glcm)
+#install.packages("raster")
+library(raster)
+#install.packages("rgdal")
+library(rgdal)
+
+setwd("C:/Users/Laura/Documents/Uni/Rmsc/Data/Fernerkundung/ergebnisse/")
+
+path = "C:/Users/Laura/Documents/Uni/Rmsc/"
+
+pskripte=paste0(path, "Skripte/")
+pdaten=paste0(path, "Data/")
+pfunktionen = paste0(path, "Funktionen/")
+pfernerkundung = paste0(pdaten, "Fernerkundung/")
+paerial = paste0(pfernerkundung, "aerial/")
+plidar = paste0(pfernerkundung, "lidar/")
+pergebnisse = paste0(pfernerkundung, "ergebnisse/")
+
+ind_ov= paste0(pergebnisse, "crop476000_5632000_ov.tif")
+
+raster_ind_ov= raster(ind_ov)
+
+#n_grey = 32, da 255 zu groß, dauert zu lange zu erstellen
+new_mean=glcm(raster_ind_ov, n_grey = 32, window = c(27, 27), shift = c(1, 1), statistics = 
+                    c("mean"), min_x=NULL, max_x=NULL, na_opt="any", 
+                  na_val=NA, scale_factor=1, asinteger=FALSE)
+writeRaster(new_mean, "crop476000_5632000_mean_27x27.tif")
+
+#how filter works
+#Mittelwert der Pixelwerte einer nxn-Matrix wird gebildet, anstelle der nxn matrix entsteht 
+#ein Pixel mit dem Wert: Mittelwert, auflösung des neuen Bildes ist n
+#Why 9x9 works best (visual)
+#resolution still good enough to seperate trees from each other; processing picture takes less time; not fuzzy anymore; smooth;
+
+```
+
+```{r, out.width = "400px"}
+#output, comparision
+knitr::include_graphics("C:/Users/Laura/Documents/Uni/Rmsc/Data/Fernerkundung/ergebnisse/vis_glcm.png")
+
+```
+

@@ -1,0 +1,109 @@
+---
+title: "W02-2"
+author: "Laura Giese, Alena Schmid, Johannes Schnell"
+date: "17 November 2017"
+output: html_document
+---
+
+```{r, eval = FALSE }
+path = "C:/Users/Laura/Documents/Uni/Rmsc/Data/fernerkundung"
+#pskripte=paste0(path, "Skripte/")
+#pdaten=paste0(path, "Data/")
+#pfunktionen = paste0(pskripte, "funktionen/")
+#pfernerkundung = paste0(pdaten, "fernerkundung/")
+paerial = paste0(path, "aerial/")
+plidar = paste0(path, "lidar/")
+
+#install.packages("raster", dependencies=TRUE)
+library(raster)
+#install.packages("rgdal")
+#install.packages("sp")
+#install.packages("tiff")
+#library(tiff)ments/Uni/Rmsc/"
+
+#load raster data (loop)
+
+temp = list.files(paerial, pattern= "*.tif", full.names = F)
+
+
+i<-1
+n<-length(temp)
+list<-list()
+
+for (i in 1:n){
+  list[[i]] <- stack(paste0(paerial, temp[[i]]))
+}
+
+#or load every file extra
+#tif1 <- paste0(paerial,"474000_5630000.tif")
+#raster1<-raster(tif1)
+#tif2 <- paste0(paerial,"474000_5632000.tif")
+#raster2<-raster(tif2)
+#tif3 <- paste0(paerial,"476000_5630000.tif")
+#raster3<-raster(tif3)
+#tif4 <- paste0(paerial,"476000_5630000_1.tif")
+#raster4<-raster(tif4)
+#tif5 <- paste0(paerial,"476000_5632000.tif")
+#raster5<-raster(tif5)
+#tif6 <- paste0(paerial,"476000_5632000_1.tif")
+#raster6<-raster(tif6)
+#tif7 <- paste0(paerial,"478000_5630000.tif")
+#raster7<-raster(tif7)
+#tif8 <- paste0(paerial,"478000_5632000.tif")
+#raster8<-raster(tif8)
+
+#list<-list(raster1, raster2, raster3, raster4, raster5, raster6, raster7, raster8)
+
+#lidar data
+
+tifL1 <- paste0(plidar,"lidar.tif")
+rasterL1<-raster(tifL1)
+
+```
+
+
+
+```{r, eval = FALSE}
+#preojection
+i<-1
+n<-length(list)
+
+for (i in 1:n){
+  projection(list[[i]]) <- CRS("+init=epsg:25832")
+  
+}
+
+```
+
+```{r, eval = FALSE}
+#crop
+
+subset<-extent(rasterL1)
+crop<-list()
+i<-1
+n<-length(list)
+
+
+for (i in 1:n){
+   crop[[i]]<-crop(list[[i]], subset)
+}
+
+#error in list[[5]] --> wrong coordinates?!
+
+crop[[6]]<-crop(list[[6]], subset)
+crop[[7]]<-crop(list[[7]], subset)
+crop[[8]]<-crop(list[[8]], subset)
+```
+
+```{r, eval = FALSE}
+#save files
+
+writeRaster(crop[[1]], "crop474000_5630000.tif")
+writeRaster(crop[[2]], "crop474000_5632000.tif")
+writeRaster(crop[[3]], "crop476000_5630000.tif")
+writeRaster(crop[[4]], "crop476000_5630000_1.tif")
+writeRaster(crop[[6]], "crop476000_5632000_1.tif")
+writeRaster(crop[[7]], "crop478000_5630000.tif")
+writeRaster(crop[[8]], "crop478000_5632000.tif")
+```
+
