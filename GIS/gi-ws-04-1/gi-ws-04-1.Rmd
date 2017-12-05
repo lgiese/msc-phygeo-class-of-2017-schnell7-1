@@ -1,0 +1,41 @@
+---
+title: "gisW02-1"
+author: "Laura Giese, Alena Schmid, Johannes Schnell"
+date: "13 November 2017"
+output: html_document
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+
+```{r, echo = TRUE}
+#ArcGis Arbeitsschritte VDR Index
+
+#1. Las to raster
+# a) DGM: Binning: Zellenzuweisungstyp: Minimum; Abtastwert:1
+# b) DSM: Binning: Zellenzuweisungstyp: Maximum; Abtastwert:1
+# c) HOME: Binning: Zellenzuweisungstyp: Average; Abtastwert:1
+
+#2. Raster Calculator:
+# (DSM-HOME)/DSM
+```
+
+
+```{r, echo=TRUE}
+#install.packages("png", dependencies=TRUE)
+library("png")
+
+setwd("C:/Users/Laura/Documents/Uni/Geoinformationssysteme")
+img <- readPNG("VDR.png")
+plot(1:1, type='n', xaxt="n", yaxt="n", xlab="", ylab = "")
+
+lim <- par()
+rasterImage(img, lim$usr[1], lim$usr[3], lim$usr[2], lim$usr[4])
+```
+

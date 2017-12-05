@@ -1,0 +1,188 @@
+x = [5,3,8,1,10,7,2 , 4, 5, 1, 7, 8, 4, 6, 5]
+
+def maxif(x):
+    y = []
+    if len(x) > 1:
+        print('len der liste     ', len(x), '     ist  gr 1 #####     neue RUNDE')
+        for i in range(len(x)):
+            print('i:', i)
+            if x[0] < x[i]:
+                print(x[i], ">", x[0])
+                y.append(x[i])
+                print(y, "sammeln")
+        print(y, 'davor')			#meint vor dem rekursivem aufruf         
+        maxif(y)
+        print(y, 'danach')
+    else:
+        print('ende')
+        print(y,'else y')
+    print(y, 'return')
+    return y
+
+maxif(x)
+____________________________________________________________________________________________________________________________________
+
+>>> def maxif(x):
+###     y = []
+...     if len(x) > 1:
+...         print('len der liste     ', len(x), '     ist  gr 1 #####     neue RUNDE')
+...         for i in range(len(x)):
+...             print('i:', i)
+...             if x[0] < x[i]:
+...                 print(x[i], ">", x[0])
+...                 y.append(x[i])
+...                 print(y, "sammeln")
+...         print(y, 'davor')     
+...         maxif(y)
+...         print(y, 'danach')
+...     else:
+...         print('ende')
+...         print(y,'else y')
+...     print(y, 'return')
+...     return y
+... 
+... 
+
+
+
+>>> maxif(x)
+
+len der liste      15      ist  gr 1 #####     neue RUNDE
+i: 0
+i: 1
+i: 2
+8 > 5
+[8] sammeln
+i: 3
+i: 4
+10 > 5
+[8, 10] sammeln
+i: 5
+7 > 5
+[8, 10, 7] sammeln
+i: 6
+i: 7
+i: 8
+i: 9
+i: 10
+7 > 5
+[8, 10, 7, 7] sammeln
+i: 11
+8 > 5
+[8, 10, 7, 7, 8] sammeln
+i: 12
+i: 13
+6 > 5
+[8, 10, 7, 7, 8, 6] sammeln
+i: 14
+[8, 10, 7, 7, 8, 6] davor
+len der liste      6      ist  gr 1 #####     neue RUNDE
+i: 0
+i: 1
+10 > 8
+[10] sammeln
+i: 2
+i: 3
+i: 4
+i: 5
+[10] davor
+ende						|||| Punkt verpasst
+[] else y
+[] return
+[10] danach
+[10] return
+[8, 10, 7, 7, 8, 6] danach
+[8, 10, 7, 7, 8, 6] return
+[8, 10, 7, 7, 8, 6]				|||| das ist der return
+
+
+
+
+>>> def maxif(x):
+...     if len(x) > 1:
+###         y = []
+...         print('len der liste     ', len(x), '     ist  gr 1 #####     neue RUNDE')
+...         for i in range(len(x)):
+...             print('i:', i)
+...             if x[0] < x[i]:
+...                 print(x[i], ">", x[0])
+...                 y.append(x[i])
+...                 print(y, "sammeln")
+...         print(y, 'davor')        
+...         maxif(y)
+...         print(y, 'danach')
+...     else:
+...         print('ende')
+...         print(y,'else y')
+...     print(y, 'return')
+...     return y
+
+
+>>> maxif(x)
+
+len der liste      15      ist  gr 1 #####     neue RUNDE
+i: 0
+i: 1
+i: 2
+8 > 5
+[8] sammeln
+i: 3
+i: 4
+10 > 5
+[8, 10] sammeln
+i: 5
+7 > 5
+[8, 10, 7] sammeln
+i: 6
+i: 7
+i: 8
+i: 9
+i: 10
+7 > 5
+[8, 10, 7, 7] sammeln
+i: 11
+8 > 5
+[8, 10, 7, 7, 8] sammeln
+i: 12
+i: 13
+6 > 5
+[8, 10, 7, 7, 8, 6] sammeln
+i: 14
+[8, 10, 7, 7, 8, 6] davor
+len der liste      6      ist  gr 1 #####     neue RUNDE
+i: 0
+i: 1
+10 > 8
+[10] sammeln
+i: 2
+i: 3
+i: 4
+i: 5
+[10] davor
+ende					|||| richtiger punkt aber dann fehler
+
+
+UnboundLocalError: local variable 'y' referenced before assignment
+---------------------------------------------------------------------------
+UnboundLocalError                         Traceback (most recent call last)
+<ipython-input-259-5dea86de10df> in <module>()
+----> 1 maxif(x)
+<ipython-input-257-a20274275497> in maxif(x)
+     10                 print(y, "sammeln")
+     11         print(y, 'davor')
+---> 12         maxif(y)
+     13         print(y, 'danach')
+     14     else:
+<ipython-input-257-a20274275497> in maxif(x)
+     10                 print(y, "sammeln")
+     11         print(y, 'davor')
+---> 12         maxif(y)
+     13         print(y, 'danach')
+     14     else:
+<ipython-input-257-a20274275497> in maxif(x)
+     14     else:
+     15         print('ende')
+---> 16         print(y,'else y')
+     17     print(y, 'return')
+     18     return y
+UnboundLocalError: local variable 'y' referenced before assignment
