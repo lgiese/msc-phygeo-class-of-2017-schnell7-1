@@ -1,0 +1,79 @@
+---
+title: "Untitled"
+author: "Johannes Schnell /ohne Gruppe"
+date: "11 Dezember 2017"
+output: html_document
+---
+
+```{r}
+getwd()
+setwd(dir ="/home/hans/Dokumente/UniMR/Datenanalyse/Aufgaben/")
+tab = read.table(file="115-46-4_feldfruechte.txt", fileEncoding = "ISO-8859-1", skip = 6, sep=";", header = T, na.strings = c("", ".", "-", "/"), fill = T, dec=",")
+lastline = 8925
+tab = data.frame(tab[1:lastline,])
+
+x = tab$Winterweizen
+y = tab$Wintergerste
+par(mfrow=c(1,1))
+plot(x, y, xlab = 'Winterweizen', ylab = 'Wintergerste')
+
+lmod <- lm(y ~ x)
+
+
+abline(lmod, col = "red")
+anova(lmod)
+summary(lmod)
+
+
+cv <- lapply(seq(nrow(tab)), function(i){
+  train <- tab[-i,]
+  test <- tab[i,]
+  lmod <- lm(Wintergerste ~ Winterweizen, data = train)
+  pred <- predict(lmod, newdata = test)
+  obsv <- test$Wintergerste
+  data.frame(pred = pred,
+             obsv = obsv,
+             model_r_squared = summary(lmod)$r.squared)
+})
+cv <- do.call("rbind", cv)
+
+ss_obsrv <- sum((cv$obsv - mean(cv$obsv, na.rm = T))**2, na.rm = T)
+ss_model <- sum((cv$pred - mean(cv$obsv, na.rm = T))**2, na.rm = T)
+ss_resid <- sum((cv$obsv - cv$pred)**2, na.rm = T)
+
+mss_obsrv <- ss_obsrv / (length(cv$obsv) - 1)
+mss_model <- ss_model / 1
+mss_resid <- ss_resid / (length(cv$obsv) - 2)
+
+plot(cv$obsv, (cv$obsv - cv$pred))
+
+data.frame(NAME = c("cross-validation F value",
+                    "linear model F value", 
+                    "cross-validatino r squared",
+                    "lienar model r squared"),
+           VALUE = c(round(mss_model / mss_resid, 2),
+                     round(anova(lmod)$'F value'[1], 2),
+                     round(1 - ss_resid / ss_obsrv, 2),
+                     round(summary(lmod)$r.squared, 2)))
+
+summary(cv$model_r_squared)
+
+se <- function(x) sd(x, na.rm = TRUE)/sqrt(length(na.exclude(x)))
+
+me <- round(mean(cv$pred - cv$obs, na.rm = TRUE), 2)
+me_sd <- round(se(cv$pred - cv$obs), 2)
+mae <- round(mean(abs(cv$pred - cv$obs), na.rm = TRUE), 2)
+mae_sd <- round(se(abs(cv$pred - cv$obs)), 2)
+rmse <- round(sqrt(mean((cv$pred - cv$obs)^2, na.rm = TRUE)), 2)
+rmse_sd <- round(se((cv$pred - cv$obs)^2), 2)
+
+data.frame(NAME = c("Mean error (ME)", "Std. error of ME", 
+                    "Mean absolute error (MAE)", "Std. error of MAE", 
+                    "Root mean square error (RMSE)", "Std. error of RMSE"),
+           VALUE = c(me, me_sd,
+                     mae, mae_sd,
+                     rmse, rmse_sd))
+
+
+```
+
