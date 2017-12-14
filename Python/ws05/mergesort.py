@@ -27,9 +27,7 @@ def merge(links, rechts):
 
 
 import random as rd
-x = []
-for i in range(15):
-    x.append(rd.randint(0,1000))
+x = [rd.randint(0,1000) for i in range(15)]
 z = x[:]
 
 
