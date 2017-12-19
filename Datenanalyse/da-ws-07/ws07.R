@@ -52,3 +52,7 @@ while(max(matze[1:(dim(matze)[1]-k), 2]) >= matze[(dim(matze)[1]-k+1),2] && leng
 unlist(strsplit(matze[which(matze[, 2] == max(matze[, 2])), 1][1], split = "+", fixed = T))
 #mit folgendem adj R squ
 max(matze[,2])
+
+
+#diese bleiben drauﬂen
+vars[which(vars %in% ergvars == F)]
