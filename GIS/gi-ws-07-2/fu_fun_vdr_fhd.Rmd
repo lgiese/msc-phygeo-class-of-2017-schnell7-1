@@ -1,0 +1,384 @@
+---
+title: "fu_fun_vdr_fhd"
+author: "Laura Giese, Johannes Schnell, Alena Schmid"
+date: "9 Januar 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r eval=FALSE}
+###-------------Missingextend-----####
+
+
+missingExtents<-function(catalogTable){
+  
+  for (i in 3:nrow(catalogTable)){
+    
+    findrows <- which(catalogTable$MinX ==0|catalogTable$MinY==0|
+                        catalogTable$MaxX==0|catalogTable$MaxY==0)
+    
+    for (j in findrows){
+      coor<-substr(catalogTable[j,1],nchar(as.character(catalogTable[j,1]))-10, nchar(as.character(catalogTable[j,1])))
+      
+      xmin<-paste0(substr(coor, 1,3), "000")
+      
+      ymin<-paste0(substr(coor, 4,7), "000")
+      
+      catalogTable[j,]$MinX=as.numeric(xmin)
+      
+      catalogTable[j,]$MinY=as.numeric(ymin)
+    }}
+
+  
+  
+  return(catalogTable)
+  
+}
+
+
+###--------------GroundSurfaceCreate----------####
+
+GroundSurfaceCreate<-function(lasFiles, res ){
+  
+  
+  paramList <- c(paste(as.character(res),"M M 1 32 0 0 "))
+  
+  
+  for (i in 1:length(lasFiles)) {
+    
+    command<-Fusion
+    command<-paste0(command, "catalog.exe")
+    command<-paste0(command," ", gi_input, basename(lasFiles[i]) )
+    command<-paste0(command," ", gi_run,lasFiles[i],".html"   )
+    system(command)
+    
+    #--> extract extent info 
+    info <- read.csv(paste0(gi_run,lasFiles[i],".csv"))
+    #fix extent
+    
+    info2<-missingExtents(info)
+    #TODO  fix error in las files if (as.numeric(info[[2]][3])) fixLas()
+    #--> define extent for further calculation
+    extent<-paste(as.numeric(info2$MinX),as.numeric(info2$MinY),as.numeric(info2$MaxX),as.numeric(info2$MaxY))
+    ext<-c(as.numeric(info2$MinX),as.numeric(info2$MinY),as.numeric(info2$MaxX),as.numeric(info2$MaxY))
+    
+    
+    #--> Create a .las with groundpoints only 
+    command<-Fusion
+    command<-paste0(command, "clipdata.exe")
+    command<-paste0(command," ","/class:2 ")
+    command<-paste0(command," ", gi_input, basename(lasFiles[i])   )
+    command<-paste0(command," ", gi_run,"ground_",basename(lasFiles[i])   )
+    command<-paste0(command," ", extent)
+    system(command)  
+    
+    #--> Create the required PLANS DTM format 
+    command<-Fusion
+    command<-paste0(command, "gridsurfacecreate.exe")
+    command<-paste0(command," ", gi_run,"surf_",basename(lasFiles[i]),".dtm")
+    command<-paste0(command," ", paramList  )
+    command<-paste0(command," ", gi_run,"ground_",basename(lasFiles[i])   )
+    system(command)}
+  
+}
+
+###------------------VDR----------------------####
+
+###------------------GridMetrics--------------####
+# to calculate HOME
+
+GridMetrics<-function(lasFiles,
+                      res, 
+                      heightClassList,
+                      metrics,
+                      heightbreak,
+                      buffer,
+                      cellbuffer,
+                      strata, instrata ){
+  metric<-raster::stack()
+  m<-list()
+  #metr<-vector("list", length(lasFiles))
+  for (i in 1:length(lasFiles)){
+    
+    #  heightClassList to string if strata or instrata is set
+    slices<-paste(unlist(heightClassList), collapse = ",")
+    
+    #calculate gridmetrics
+    command<-Fusion
+    command<-paste0(command, "gridmetrics.exe ")
+    #command<-paste0(command,"/gridxy:", extent )
+    
+    #set switches- switches will not be defined if argument is missing in function call
+    ifelse(!missing(buffer), command<-paste0(command, " /buffer:", 
+                                             buffer), command<-command)
+    ifelse(!missing(cellbuffer), command<-paste0(" /cellbuffer:", 
+                                                 cellbuffer), command<-command)
+    ifelse(!missing(strata), command<-paste0(" /strata:", 
+                                             slices), command<-command)
+    ifelse(!missing(instrata), command<-paste0(" /instrata:", 
+                                               slices), command<-command)
+    # set basic parameters
+    command<-paste0(command," ", gi_run,"surf_",lasFiles[i],".dtm")
+    command<-paste0(command, " ", heightbreak)
+    command<-paste0(command, " ", res)
+    command<-paste0(command," ", gi_run,lasFiles[i], "_GridMetrics.csv"   )
+    command<-paste0(command," ", gi_input, lasFiles[i])
+    system(command) 
+    
+    #create ascii raster from gridmetrics, for column indexing look up indexes given 
+    #in Fusion Manual p.78/79
+    
+    
+    
+    for (j in 1:length(metrics)){
+      
+      command<-Fusion
+      command<-paste0(command, "csv2grid.exe")
+      command<-paste0(command, " ",  gi_run,lasFiles[i], "_GridMetrics_all_returns_elevation_stats.csv")
+      command<-paste0(command, " ", metrics[j])
+      command<-paste0(command, " ", gi_output, lasFiles[i],"_","elevationMetrics",metrics[j], ".asc")
+      system(command) 
+      
+      
+      
+      
+      r <- raster::raster(paste0(gi_output, lasFiles[i],"_","elevationMetrics",metrics[j], ".asc"),quick=T, crs=proj4)
+      r[r[]==NAvalue(r)]<-NA  #replace arbitrary NA values with "NA"
+      if (j>1) r <- raster::resample(r, rold, method = 'bilinear')
+      rold<-r
+      metric<-raster::stack(metric,r,quick=T)
+      
+    } 
+    #raster::setExtent(metric,ext)
+    #raster::crs(metric)<- proj4
+    m[[i]]<-metric
+    metric<-raster::stack()
+    
+  }
+  
+  return(m)
+  
+}
+
+###----------------------densitymetrics---------####
+
+densityMetrics<-function(lasFiles, heightClassList, res){
+  
+  slices<-paste(unlist(heightClassList), collapse = ",")
+  for (i in lasFiles){
+    command<-Fusion
+    command<-paste0(command,"densitymetrics.exe")
+    command<-paste0(" /slices:", slices)
+    command<-paste0(command, " ",gi_run,"surf_",i,".dtm" )
+    command<-paste0(command," ", res, " ", 0.2)
+    command<-paste0(command," ", gi_run,i,"densMetrics", ".dtm"   )
+    command<-paste0(command," ", gi_input, i )
+    system(command)
+  }}
+
+###---------------funVDR------------------####
+
+fun_vdr <- function(max,med) {
+  vdr <- (max[[1]] - med[[1]]) / max[[1]]
+}
+
+
+###----------------------FHD--------------####
+
+###------------------slices---------------####
+
+fu_sliceRas<- function(lasFiles = NULL,
+                       zrange =  NULL,
+                       zrnames = NULL,
+                       paramList=c("1 M M 1 32 0 0 "),
+                       res= 10,
+                       proj4 = "+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+) {
+  
+  paramList <- c(paste(as.character(gridsize),"M M 1 32 0 0 "))
+  density<-raster::stack()
+  d<-list()
+  
+  
+  for (i in 1:length(lasFiles)) {
+    
+    
+    for (j in 1:length(zrange)){
+      info <- strsplit(readLines(paste0(gi_run,lasFiles[i],".csv"),encoding = "utf-8"),split = ",")
+      
+      #TODO  fix error in las files if (as.numeric(info[[2]][3])) fixLas()
+      #--> define extent for further calculation
+      extent<-paste(as.numeric(info[[2]][3]),as.numeric(info[[2]][4]),as.numeric(info[[2]][6]),as.numeric(info[[2]][7]))
+      ext<-c(as.numeric(info[[2]][3]),as.numeric(info[[2]][4]),as.numeric(info[[2]][6]),as.numeric(info[[2]][7]))
+      
+      #--> Create a a horizontally sliced las file which is reduced by the DEM
+      
+      command<-Fusion
+      command<-paste0(command,"clipdata.exe")
+      command<-paste0(command," ", "/zmin:",zrange[[j]][1])
+      command<-paste0(command," ", "/zmax:",zrange[[j]][2])
+      command<-paste0(command," ", "/height")
+      command<-paste0(command," ", "/dtm:",gi_run,"surf_",basename(lasFiles[i]),".dtm")
+      command<-paste0(command," ", "/ground")
+      command<-paste0(command," ", gi_input, basename(lasFiles[i]))
+      command<-paste0(command," ", gi_run,"normalised_",zrnames[[j]],"_",basename(lasFiles[i]))
+      command<-paste0(command," ", extent)
+      system(command)  
+      
+      
+      ### NOTE Linux you need to install install winetricks mfc42
+      #--> create the return density (that means counts per area)
+      command<-Fusion
+      command<-paste0(command, "returndensity.exe")
+      command<-paste0(command," ", "/ascii")
+      command<-paste0(command," ", gi_run,lasFiles[i],zrnames[[j]],"_density.asc "  )
+      command<-paste0(command," ", res   )
+      command<-paste0(command," ", gi_run,"normalised_",zrnames[[j]],"_",basename(lasFiles[i])   )
+      system(command)  
+      
+      r <- raster::raster(paste0(gi_run,lasFiles[i],zrnames[[j]],"_density.asc"),quick=T)
+      r[r[]==NAvalue(r)]<-NA  #replace arbitrary NA values with "NA"
+      if (j>1) r <- raster::resample(r, rold, method = 'bilinear')
+      rold<-r
+      
+      #--> stack the file
+      density<-raster::stack(density,r,quick=T)
+      #-->stack overall density
+      #density<-raster::stack(density, sum(density))
+      
+      
+      
+    }
+    raster::setExtent(density,ext)
+    raster::crs(density)<- proj4
+    od<-sum(density)
+    density<-raster::stack(density, od)
+    d[[i]]<-density
+    density<-raster::stack()
+  }
+  return(d) 
+  
+}
+
+###------------funFHD-------####
+
+fun_fhd <- function(a) {
+  l <- raster::nlayers(a)
+  r <- -1 * ((a/a[[l]]) * log(a / (a/a[[l]])))
+  abs(sum(r[[1:(l-1)]]))
+}
+
+###---------readytotakeoff--------####
+setwd("C:/Users/Laura/Documents/Uni/Rmsc/Data/GIS/POINTCLOUD_processing/rootDir")
+
+install.packages("gdalUtils")
+library(raster)
+install.packages("mapview")
+
+#--> projDir is general project folder  basic folder eg. C:/Dokumente/1_semester_MSCGEO/GIS/
+#projDir<-"C:/Users/Jannis/Projekte/"
+#-->  rootFolder of the github repository 
+rootDir<-"C:/Users/Laura/Documents/Uni/Rmsc/Data/GIS/POINTCLOUD_processing/rootDir/"
+gi_input<-"C:/Users/Laura/Documents/Uni/Rmsc/Data/GIS/POINTCLOUD_processing/rootDir/gi_input/"
+gi_run<-"C:/Users/Laura/Documents/Uni/Rmsc/Data/GIS/POINTCLOUD_processing/rootDir/gi_run/"
+gi_output<-"C:/Users/Laura/Documents/Uni/Rmsc/Data/GIS/POINTCLOUD_processing/rootDir/gi_output/"
+
+lasfiles<-list.files(paste0(gi_input),pattern=".las$", full.names=FALSE) 
+
+#--> dirty workaround for platform indepentend  use of fusion
+#source(paste0(fun,"controlFusion.txt"))
+
+#--> list of height pairs as used for slicing the las data
+zrList <- list(c(0.5,5,10,15,20,50))
+zrange<- list(c(0.5,5),c(5,10),c(10,15),c(15,20),c(20,50))
+zrnames<- list("n0.5","n5","n10","n15","n20","n50")
+
+# target grid size
+gridsize <- 20
+
+# for assignment of projection
+proj4 = "+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+
+#plot?
+plotIt <- TRUE
+
+# Most Fusion tools require a DEM and extent Info. 
+
+GroundSurfaceCreate(lasFiles = lasfiles,res=gridsize)
+
+# call fusion based slicing funktion
+density<-fu_sliceRas(lasFiles = lasfiles,
+                     zrange = zrange, 
+                     zrnames = zrnames,  
+                     paramList = c("10 M M 1 32 0 0 "),
+                     res = gridsize)
+
+
+# call fusion based metrics for Median (31) and Max(7) according to Fusion Manual p.78/79
+gridMet<- GridMetrics(lasFiles = lasfiles, 
+                      res = gridsize, 
+                      heightClassList = unlist(zrList), 
+                      metrics = c(7,31), 
+                      heightbreak=0.2 )
+
+
+fhd<-list()
+vdr<-list()
+for (i in 1:length(gridMet)){
+  cat(i)
+  #--> FHD using the fun_fhd function  provided in diversityIdx.R
+  fhd[[i]]<- fun_fhd(unlist(density[[i]]))
+  g<-gridMet[[i]] 
+  g[g[]<0]<-NA
+  g[is.na(g[])] <- 0 
+  g[is.infinite(g[])] <- 0 
+  #--> VDR using the fun_vdr function  provided in diversityIdx.R
+  vdr[[i]]<-fun_vdr(g[[1]],g[[2]])
+  if (plotIt){
+    plot(fhd[[i]],  col=rev(heat.colors(10)),main="FHD Index")
+    plot(vdr[[i]],  col=rev(heat.colors(10)),main="VDR Index")
+    # mapview::mapview(fhd[[j]],
+    #                  col.regions = rev(heat.colors(10)), 
+    #                  legend = TRUE,
+    #                  alpha.regions = 0.3,
+    #                  layer.name="FHD Index") 
+    
+  }
+  
+  
+}
+
+VDR<-do.call(merge,vdr)
+
+FHD<-do.call(merge, fhd)
+
+plot(FHD)
+
+writeRaster(FHD, "FHD_j_sol.tif")
+writeRaster(VDR, "VDR_j_sol.tif")
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=T}
+library(raster)
+rootDir<-"C:/Users/Laura/Documents/Uni/Rmsc/Data/GIS/POINTCLOUD_processing/rootDir/"
+gi_input<-"C:/Users/Laura/Documents/Uni/Rmsc/Data/GIS/POINTCLOUD_processing/rootDir/gi_input/"
+gi_run<-"C:/Users/Laura/Documents/Uni/Rmsc/Data/GIS/POINTCLOUD_processing/rootDir/gi_run/"
+gi_output<-"C:/Users/Laura/Documents/Uni/Rmsc/Data/GIS/POINTCLOUD_processing/rootDir/gi_output/"
+vdr_reloaded<-raster(paste0(rootDir, "VDR_j_sol.tif"))
+fhd_reloaded<-raster(paste0(rootDir, "FHD_j_sol.tif"))
+hist(vdr_reloaded)
+plot(vdr_reloaded)
+hist(fhd_reloaded)
+plot(fhd_reloaded)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
