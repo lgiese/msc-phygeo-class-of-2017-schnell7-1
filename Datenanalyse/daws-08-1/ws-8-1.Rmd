@@ -1,0 +1,65 @@
+---
+title: "Untitled"
+author: "Johannes Schnell"
+date: "10 Januar 2018"
+output: html_document
+---
+```{r}
+# nach NAUSS
+setwd("/home/hans/Dokumente/UniMR/GIT/Datenanalyse")
+
+# Load libraries ---------------------------------------------------------------
+library(mgcv)
+
+
+# Read csv file and clean data frame -------------------------------------------
+woodhrv <- read.table( "data/hessen_holzeinschlag_1997-2014_clean.csv",
+                      skip = 0, header = TRUE, sep = ",")
+woodhrv
+
+
+# Summarize --------------------------------------------------------------------
+summary(woodhrv)
+
+
+# Compute 100 fold cross validation and model training -------------------------
+knots <- seq(3, 13)
+
+cv <- lapply(knots, function(k){
+  
+  kcv <- lapply(seq(100), function(c){
+    
+    set.seed(c)
+    smpl <- sample(nrow(woodhrv), nrow(woodhrv)*0.8)
+    train <- woodhrv[smpl, ]
+    test <- woodhrv[-smpl, ]
+    gmod <- gam(Buche ~ s(Eiche, k = k, fx = TRUE), data = train)
+    pred <- predict(gmod, test)
+    obsv <- test$Buche
+    data.frame(knots = k,
+               rmse = sqrt(mean((pred - obsv)**2)),
+               rsq = summary(gmod)$r.sq)
+    
+  })
+  
+  kcv <- do.call("rbind", kcv)
+  data.frame(knots = unique(kcv$knots),
+             rmse = mean(kcv$rmse),
+             rmse_sd_plus = mean(kcv$rmse) + sd(kcv$rmse),
+             rmse_sd_minus = mean(kcv$rmse) - sd(kcv$rmse),
+             rsq = mean(kcv$rsq))
+  
+})
+
+cv <- do.call("rbind", cv)
+
+plot(cv$knots, cv$rmse/max(cv$rmse), type = "l", col = "red",
+     ylim = c(min(cv$rmse_sd_minus/max(cv$rmse)), max(cv$rmse_sd_plus/max(cv$rmse))))
+lines(cv$knots, cv$rmse_sd_plus/max(cv$rmse), col = "red", lty = 2)
+lines(cv$knots, cv$rmse_sd_minus/max(cv$rmse), col = "red", lty = 2)
+lines(cv$knots, cv$rsq, col = "blue")
+
+legend(10, 0.6, c("rmse", "r squared"), col = c("red", "blue"), lty = 1)
+
+```
+
