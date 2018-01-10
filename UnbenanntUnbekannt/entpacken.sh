@@ -1,0 +1,9 @@
+find sortiert/campbell/ -name '*.tar' -execdir tar -vxf {}  \;
+find sortiert/cl31/ -name '*tar' -execdir tar -vxf {}  \;
+find sortiert/cloudradar/ -name '*.tar' -execdir tar -vxf {}  \;
+find sortiert/gps_wv/ -name '*.tar' -execdir tar -vxf {}  \;
+find sortiert/mrr/ -name '*.tar' -execdir tar -vxf {}  \;
+find sortiert/ott/ -name '*.tar' -execdir tar -vxf {}  \;
+find sortiert/usa/ -name '*.tar' -execdir tar -vxf {}  \;
+find sortiert/vpf710/ -name '*.tar' -execdir tar -vxf {}  \;
+find sortiert/vpf730/ -name '*.tar' -execdir tar -vxf {}  \;
