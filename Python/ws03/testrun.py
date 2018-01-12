@@ -23,7 +23,9 @@ def sucher2(unten, oben, such):
         zeit2 = time.clock()
         #print("gefunden", z, "mit", n, "Schritten", "tdif=", zeit2-zeit1)
         #print("ret")
-    return(z,n, zeit2-zeit1)	
+        erg=[]
+        erg=z,n
+    return(erg)	
 
 def testrunner(lauf, weit, unten=0):
     li = []
