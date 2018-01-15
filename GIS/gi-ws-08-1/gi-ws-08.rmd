@@ -1,6 +1,6 @@
 ---
 title: "gi_ws08_1"
-author: "Laura Giese, Caro Schnell, Alena Schmid"
+author: "Laura Giese, Johannes Schnell, Alena Schmid"
 date: "15 Januar 2018"
 output: html_document
 ---
@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 exercise:
 - CHM (normalisiert) 1m
 - r befehl: focal(), moving window  (50m) --> varianz
-- absolute höhen + Schwellenwert
+- absolute hÃ¶hen + Schwellenwert
 
 --> Anteil an Lichtung
 
