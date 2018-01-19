@@ -1,0 +1,183 @@
+---
+title: "W06-2"
+author: "Laura Giese, Johannes Schnell, Alena Schmid"
+date: "18 Januar 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###script leave many out crossvalidation for improving LandUseClassification,
+#input: - shapefile of all classes for ImageClassification
+#       - rgbImage (example: caldern)
+#workflow:
+#       - leave out one main class (example: wasser) with n subclasses
+#       - compute training_areas_shape_file containing all remaining classes
+#       - calculate confusion matrix with otb_TrainImageClassifier
+#       - calculate kappa from confusion matrix
+#output: matrix with left-out-class and corresponding kappa value
+
+
+```{r, echo = T}
+### packages and functions
+library(raster)
+library(sp)
+library(rgdal)
+library(maptools)
+library(prodlim)
+#install.packages("maptools")
+
+#function: Compute Kappa based on contingency table
+#' 
+#' @description
+#' Compute Kappa index.
+#'
+#' @param ctable Contingency table
+#'
+#' @return Kappa index.
+#'
+compKappa <- function(ctable){
+  ctable <- ctable/sum(ctable)
+  categories <- nrow(ctable)
+  
+  # Fraction of agreement
+  pagrm <- 0
+  for(i in seq(categories)){
+    pagrm <- pagrm + ctable[i,i]
+  }
+  
+  # Expected fraction of agreement subject to the observed distribution
+  pexpct <- 0
+  for(i in seq(categories)){
+    pexpct <- pexpct + sum(ctable[i,]) * sum(ctable[,i])
+  }
+  
+  # Kappa index
+  kappa <- (pagrm - pexpct)/(1 - pexpct)
+  
+  return(kappa)
+}
+
+#folder structure
+setwd("C:/Users/Laura/Documents/Uni/Fernerkundung/Daten/LN_train/train_kappa")
+path_in = "C:/Users/Laura/Documents/Uni/Fernerkundung/Daten/LN_train/neu/"
+path_out = "C:/Users/Laura/Documents/Uni/Fernerkundung/Daten/LN_train/train_kappa/"
+path_trainImage = "C:/OSGeo4W64/bin/"
+```
+
+START
+
+```{r, echo = T}
+#load shape file
+dbf_file = readOGR(paste0(path_in, "allclassfort.dbf"))
+
+#klassenerkennung: which class is what?, not essential for script
+g<-as.factor(dbf_file@data[,3])
+f<-as.factor(dbf_file@data[,4])
+d<-paste0(levels(g),"_",levels(f))
+
+#create dateframe to pick classes (instead of random sampling)
+df<-dbf_file@data[,3:4]
+#create output matrix
+kappa_out<-matrix(NA, 7, 2)
+
+for (i in seq(1:7)){
+#generating training area-shape files and leaving out one main class (stratified sampling) 
+#instead of random sampling
+  if (i == 1){
+    class = "none"
+    print(class)
+    training_areas <- dbf_file
+  } else if (i == 2){
+  class = "wald"
+  print(class)
+  leaveout<-which(is.element(df[,1], c(0:99)))  
+  }else if(i == 3){
+    class = "felder"
+    print(class)
+    leaveout<- which(is.element(df[,1], c(100:199)))  
+  }else if(i == 4){
+    class = "siedlung"
+    print(class)
+    leaveout<-which(is.element(df[,1], c(200:299)))  
+  }else if(i == 5){
+    class = "wiesen"
+    print(class)
+    leaveout <- which(is.element(df[,1], c(300:399)))
+  }else if(i == 6){
+    class = "strassen"
+    print(class)
+    leaveout <- which(is.element(df[,1], c(400:499)))
+  }else if(i == 7){
+    class = "wasser"
+    print(class)
+    leaveout <- which(is.element(df[,1], c(500:599)))
+  }
+#as nothing is left out in first run (input: whole shape file), there´s no test data  
+  if (i == 1){
+    print(class)
+  } else {
+    #create training and test data sets
+    test_areas <- dbf_file[leaveout,]
+    training_areas <- dbf_file[-leaveout,]
+    
+    #savefiles as shape files
+    writeOGR(test_areas, paste0(path_out, "test_areas_", i ,".shp"), 
+             paste0(basename(paste0(path_out, "test_areas_", i, ".shp"))), 
+             driver = "ESRI Shapefile", overwrite = T)
+  }
+  #savefiles as shape files
+  writeOGR(training_areas, paste0(path_out, "training_areas_", i ,".shp"), 
+           paste0(basename(paste0(path_out, "training_areas_", i, ".shp"))), 
+           driver = "ESRI Shapefile", overwrite = T)
+  
+  #calculate confusion matrix with "TrainImageClassifier" as "otbcli_ComputeConfusionMatrix"
+  #is not producing a nxn-matrix?!  
+  system(paste0(path_trainImage,"otbcli_TrainImagesClassifier ",
+                "-io.il C:/Users/Laura/Documents/Uni/Fernerkundung/ergebnisse/rgbRaster_cal.tif ",
+                "-io.vd C:/Users/Laura/Documents/Uni/Fernerkundung/Daten/LN_train/train_kappa/training_areas_", i,".shp ",
+                "-elev.default 0 ","-sample.mt 1000 ", "-sample.mv 1000 ", "-sample.bm 1 ", 
+                "-sample.edg true ", "-sample.vtr 0.5 ", "-sample.vfn LN_New ", "-classifier rf ",
+                "-classifier.rf.max 5 ", "-classifier.rf.min 10 ", "-classifier.rf.ra 0 ",
+                "-classifier.rf.cat 10 ",  "-classifier.rf.var 0 ", "-classifier.rf.nbtrees 100 ",
+                "-classifier.rf.acc 0.01 ", "-rand 0 ",
+                "-io.confmatout C:/Users/Laura/Documents/Uni/Fernerkundung/Daten/LN_train/train_kappa/confmat_", i,".txt ",
+                "-io.out C:/Users/Laura/Documents/Uni/Fernerkundung/Daten/LN_train/train_kappa/model_", i,".txt "))
+  
+  #try with computeconfusionmatrix... working but error when running kappa function (no nxn matrix?)
+  #system(paste0(path_trainImage, "otbcli_ComputeConfusionMatrix ",
+  #"-in C:/Users/Laura/Documents/Uni/Fernerkundung/ergebnisse/2018/rgboutimg1.tif ",
+  #"-ref vector ",
+  #"-ref.vector.in C:/Users/Laura/Documents/Uni/Fernerkundung/Daten/LN_train/train_kappa/training_areas_", i,".shp ",
+  #"-ref.vector.field LN_New ","-nodatalabel 0 ", 
+  #"-ram 128 ",
+  #"-out C:/Users/Laura/Documents/Uni/Fernerkundung/Daten/LN_train/train_kappa/confmat_test/confmat_ccm_", i,".txt "))
+
+  ctable<-read.table(paste0("C:/Users/Laura/Documents/Uni/Fernerkundung/Daten/LN_train/train_kappa/confmat_", i,".txt"), sep = ",", header = F)
+
+  #generate output file
+  kappa<-compKappa(ctable=ctable)
+  print(kappa)
+  kappa_out[i,1]<-class
+  kappa_out[i,2]<-kappa
+}
+colnames(kappa_out)<-c("leftout", "kappa")
+print(kappa_out)
+
+#save output file
+write.table(kappa_out, "C:/Users/Laura/Documents/Uni/Fernerkundung/Daten/LN_train/train_kappa/kappa_out_ccm.txt")
+
+
+#make sure projection is correct
+#training_areas <- spTransform(training_areas, CRS("+init=epsg:25832"))
+#test_areas <- spTransform(test_areas, CRS("+init=epsg:25832"))
+
+#make sure extent is correct
+#ex <- extent(475927,5630630,478886,5633083)
+#training_areas@bbox<-as.matrix(ex)
+#test_areas@bbox<-as.matrix(ex)
+#plot(training_areas)
+
+```
