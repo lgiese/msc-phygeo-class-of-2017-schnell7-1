@@ -123,16 +123,17 @@ lichtung = function(x, mat_size, min_size, mean_kill, var_kill, save) {
 
 
 #run several times with different values for function variables
-#for(minv in c(3)){
-#  for(matv in c(13,17,23,31,51)){
-#    for(mk in c(7)){
-#      for(vk in c(1000)){
-#        lichtung(chm4las, mat_size = matv, min_size = minv, mean_kill = mk, var_kill = vk, save=T)
+reihenweise = function(x, minv, matv, mk, vk, rsave)
+for(minv in c(3)){
+  for(matv in c(13,17,23,31,51)){
+    for(mk in c(7)){
+      for(vk in c(1000)){
+        lichtung(x = chm4las, mat_size = matv, min_size = minv, mean_kill = mk, var_kill = vk, save=rsave)
         
-#      }
-#    }
-#  }
-#}
+      }
+    }
+  }
+}
 
 #show png: output with different window sizes
 
