@@ -33,6 +33,11 @@ smallmerge(40, sek15)
 smallmerge(70, sek30)
 
 
+#LSMSVector
+system(paste0(otbPath, "otbcli_LSMSVectorization -in " ,quo, file, quo, " -inseg ", quo, sek30, quo, " -out ", out_dir, "vector.shp"))
+
+
+
 ###############################################################################################
 #Nur mit rgb
 r = raster(paste0(in_dir, "geonode_ortho_muf_rgb_idx_pca_scaled.tif"), band = 1)
