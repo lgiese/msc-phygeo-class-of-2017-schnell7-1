@@ -1,0 +1,13 @@
+---
+title: "Untitled"
+output: html_document
+---
+```{r echo=T, out.width='100%'}
+#nach merge 3 kanaele
+knitr::include_graphics('D:/UniData/rms/data/out/rgbMerge40.png')
+#nach merge 7 kanaele
+knitr::include_graphics('D:/UniData/rms/data/out/Merge70.png')
+#vector von 7 kanaele
+knitr::include_graphics('D:/UniData/rms/data/out/vec.png')
+
+```
