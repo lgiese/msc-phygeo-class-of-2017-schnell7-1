@@ -19,6 +19,7 @@ for y in range(len(ar)):
     print(y, max(ar[y]))
 #%%
 #vermeintliche gipfelhoehe als zahl eingeben
+#dateityp des arrays (float32) ist anders als float (2041.27 z.B.), logische abfragen in py daher immer FALSE
 for y in range(len(ar)):
     if round(float(max(ar[y])), 2) == 2041.27 :
         print(y, max(ar[y]))
