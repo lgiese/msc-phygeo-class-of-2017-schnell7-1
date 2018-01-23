@@ -3,7 +3,7 @@
 import math
 import gdal, ogr, osr, os
 import numpy as np
-
+# props an https://pcjericks.github.io/py-gdalogr-cookbook/raster_layers.html#replace-no-data-value-of-raster-with-new-value
 def raster2array(rasterfn):
     raster = gdal.Open(rasterfn)
     band = raster.GetRasterBand(1)
