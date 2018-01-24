@@ -50,6 +50,8 @@ def dominanz(z,s, dgm_ar, step, res):
     if len(end_list)> 0:
         print(end_list)
         return(min(end_list)*res)
+    else:
+        print("""Alarm!Alarm!Alarm!Alarm!Alarm!Alarm! \n\n       setze 'step' groesser!\n\n====================================""")
         
 
         
@@ -58,7 +60,7 @@ def dominanz(z,s, dgm_ar, step, res):
 
 
 #%%
-dominanz(78,60,ar,5,200)
+dominanz(80,65,ar,5,200)
     
 #%%
 def eigenstand(h, d, p):
