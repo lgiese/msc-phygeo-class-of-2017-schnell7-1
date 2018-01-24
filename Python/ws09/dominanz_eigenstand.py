@@ -60,7 +60,7 @@ def dominanz(z,s, dgm_ar, step, res):
 
 
 #%%
-dominanz(80,65,ar,5,200)
+dominanz(80,65,ar,64,200)
     
 #%%
 def eigenstand(h, d, p):
@@ -83,3 +83,23 @@ eigenstand(h, 300, d)
 h2 = float(ar[80][65])
 d2 = dominanz(80,65,ar,55,200)
 eigenstand(h2, 300, d2)
+
+#%%
+#der Ansatz, das Fenster schrittweise zu vergroessern ist nicht ideal:
+#liegt der erste Punkt > Gipfel in der diagonalen des Quadrats ist die Entfernung
+#e = x*(wurzel 2)
+#ein wesentlich groessere Fenster kann aber trotzdem einen naeheren Punkt enthalten
+#(wenn nur in x bzw y Richtung gegangen wird)
+#Bsp fenstergroesse 50
+distanz(0,0,50,50)
+# = 70,71
+#also ein fenster der groesse 70 kann eine naehere distanz (70<70,71) haben
+distanz(0,0,0,70)
+# = 70
+#bsp von werten fuer 80\65
+#14990.663761154807 53 / erster treffer
+#13172.69904006009 60
+#12801.562404644206 64
+#12801.562404644206 100
+#12801.562404644206 125 /letzter treffer weil .tif zu klein
+#Erkenntnis: das Fenster sollte eher die maximale Ausdehnung oder zumindest eine sehr grosse haben
