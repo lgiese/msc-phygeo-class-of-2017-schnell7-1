@@ -79,9 +79,9 @@ h = float(ar[78][60])
 d = dominanz(78,60,ar,5,200)
 eigenstand(h, 300, d)
 #%%
-#naechster hoeherer gipfel viel wieter weg; step deswegen 55 (53 geht auch)
+#naechster hoeherer gipfel viel wieter weg; 
 h2 = float(ar[80][65])
-d2 = dominanz(80,65,ar,55,200)
+d2 = dominanz(80,65,ar,64,200)
 eigenstand(h2, 300, d2)
 
 #%%
