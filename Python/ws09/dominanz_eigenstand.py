@@ -103,3 +103,5 @@ distanz(0,0,0,70)
 #12801.562404644206 100
 #12801.562404644206 125 /letzter treffer weil .tif zu klein
 #Erkenntnis: das Fenster sollte eher die maximale Ausdehnung oder zumindest eine sehr grosse haben
+#oder die groesse erhoeht sich um xneu = xalt * (wurzel 2) auf die naechste ganzzahl aufgerundet
+#beim Beispiel von 50 also auf 71
