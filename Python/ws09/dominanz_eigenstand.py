@@ -77,12 +77,12 @@ def eigenstand(h, d, p):
  #gipfel hat nahegelegen hoeheren gipfelnachbar deswegen reicht 5 (3 ginge auch)
 h = float(ar[78][60])
 d = dominanz(78,60,ar,5,200)
-eigenstand(h, 300, d)
+eigenstand(h, d, 300)
 #%%
 #naechster hoeherer gipfel viel wieter weg; 
 h2 = float(ar[80][65])
 d2 = dominanz(80,65,ar,64,200)
-eigenstand(h2, 300, d2)
+eigenstand(h2, d2, 300)
 
 #%%
 #der Ansatz, das Fenster schrittweise zu vergroessern ist nicht ideal:
