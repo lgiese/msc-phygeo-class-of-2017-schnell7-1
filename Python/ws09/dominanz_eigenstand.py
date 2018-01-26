@@ -11,7 +11,7 @@ def raster2array(rasterfn):
     return band.ReadAsArray()
 
 #%%
-ar = raster2array("./subalpen.tif")
+ar = raster2array("H:/Dokumente/Datenanalyse/msc-phygeo-class-of-2017-schnell7-1/Python/ws09/subalpen.tif")
 #%%
 #gipfelsuche entweder im gis oder hiermit
 def maxprozeile(ar):
@@ -124,7 +124,7 @@ def dominanzB(z,s, dgm_ar, step=1, res):
                   end_list.append(dissi)
       step = step+1
     end_list = []
-    step = int(step-1 * math.sqrt(2)) + 1
+    step = int((step-1) * math.sqrt(2)) + 1
     for y in range(z-step, z+step+1):
           for x in range(s-step, s+step+1):
               if dgm_ar[z][s] < dgm_ar[y][x]:
@@ -136,4 +136,3 @@ def dominanzB(z,s, dgm_ar, step=1, res):
         return(min(end_list)*res)
     else:
         print("""Alarm!Alarm!Alarm!Alarm!Alarm!Alarm! \n\n       setze 'step' groesser!\n\n====================================""")
-        
