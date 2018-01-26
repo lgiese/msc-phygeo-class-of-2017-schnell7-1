@@ -102,7 +102,7 @@ distanz(0,0,50,50)
 #also ein fenster der groesse 70 kann eine naehere distanz (70<70,71) haben
 distanz(0,0,0,70)
 # = 70
-#bsp von werten fuer 80\65
+#bsp von werten fuer 80|65
 #14990.663761154807 53 / erster treffer
 #13172.69904006009 60
 #12801.562404644206 64
@@ -111,3 +111,29 @@ distanz(0,0,0,70)
 #Erkenntnis: das Fenster sollte eher die maximale Ausdehnung oder zumindest eine sehr grosse haben
 #oder die groesse erhoeht sich um xneu = xalt * (wurzel 2) auf die naechste ganzzahl aufgerundet
 #beim Beispiel von 50 also auf 71
+#%% beta dominanz| erst wird nach dem ersten treffer gesucht wobei sich das fenster um 1 / schritt erhöht,
+#von dieser groesse dann xneu = xalt * (wurzel 2) berechnet und damit sichergestellt, dass die punkte richtig erkannt werden
+#zeile, spalte(des gipfels), array des dgm, step grosse des fensters minimale dis wird ausgesucht, res = zellengroesse
+def dominanzB(z,s, dgm_ar, step=1, res):
+    end_list = []
+    while len(end_list) == 0:
+      for y in range(z-step, z+step+1):
+          for x in range(s-step, s+step+1):
+              if dgm_ar[z][s] < dgm_ar[y][x]:
+                  dissi = distanz(z,s,y,x)
+                  end_list.append(dissi)
+      step = step+1
+    end_list = []
+    step = int(step-1 * math.sqrt(2)) + 1
+    for y in range(z-step, z+step+1):
+          for x in range(s-step, s+step+1):
+              if dgm_ar[z][s] < dgm_ar[y][x]:
+                  dissi = distanz(z,s,y,x)
+                  end_list.append(dissi)                    
+    if len(end_list)> 0:
+        #print(end_list)
+        print("dominanz: ", min(end_list)*res)
+        return(min(end_list)*res)
+    else:
+        print("""Alarm!Alarm!Alarm!Alarm!Alarm!Alarm! \n\n       setze 'step' groesser!\n\n====================================""")
+        
