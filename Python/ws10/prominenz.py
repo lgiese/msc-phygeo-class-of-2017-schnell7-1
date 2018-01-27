@@ -53,7 +53,7 @@ def canigo_fill(start, ar, fill):
                 start.append((neu[i][0], neu[i][1]))
                 start = list(set(start))
         kennichschon = kennichschon + start
-        kennichschon = kennichschon + start
+        kennichschon = list(set(kennichschon))
         #print(len(neu), len(kennichschon), len(start))
     else:
         #print("kein weiterer Gipfel")
