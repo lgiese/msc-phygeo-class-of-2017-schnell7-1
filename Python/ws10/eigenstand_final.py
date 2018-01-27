@@ -38,7 +38,7 @@ def canigo_fill(start, ar, fill):
                 start.append((neu[i][0], neu[i][1]))
                 start = list(set(start))
         kennichschon = kennichschon + start
-        kennichschon = kennichschon + start
+        kennichschon = list(set(kennichschon))
         #print(len(neu), len(kennichschon), len(start))
     else:
         #print("kein weiterer Gipfel")
@@ -95,7 +95,7 @@ def eigenstand(h, d, p):
 def estand(y,x,ar,step,res, dwn_stp):
     h = float(ar[y][x])
     d = dominanzB(y,x,ar,step,res)
-    p = float(prominenz([[y,x]], ar, dwn_stp))
+    p = float(prominenz([(y,x)], ar, dwn_stp))
     print("hoehe: ", h, "dominanz: ", d, "prominenz: ", p)
     print("eigenstand: ", eigenstand(h,d,p))
     return(eigenstand(h,d,p))
