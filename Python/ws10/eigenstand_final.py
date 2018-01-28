@@ -49,8 +49,9 @@ def prominenz(start, ar, dwn_stp):
     fillv = ar[start[0][0]][start[0][1]]
     gipfel = False
     while gipfel == False:
-        fillv = fillv - dwn_stp        
-        gipfel = canigo_fill(start, ar, fillv-dwn_stp)
+        fillv = fillv - dwn_stp
+        #print(fillv)        
+        gipfel = canigo_fill(start, ar, fillv)
     return(fillv)
 
 #%%
@@ -96,6 +97,7 @@ def estand(y,x,ar,step,res, dwn_stp):
     h = float(ar[y][x])
     d = dominanzB(y,x,ar,step,res)
     p = float(prominenz([(y,x)], ar, dwn_stp))
+    p = h-p
     print("hoehe: ", h, "dominanz: ", d, "prominenz: ", p)
     print("eigenstand: ", eigenstand(h,d,p))
     return(eigenstand(h,d,p))
@@ -105,13 +107,13 @@ def estand(y,x,ar,step,res, dwn_stp):
 
 ar = raster2array("/home/hannes/Dokumente/UniMR/py/subalpen.tif") 
 #%%
-estand(113,128,ar,1,200,20)  
+estand(113,128,ar,10,200,0.1)  
 
 #harz
 ar = raster2array("/home/hannes/Dokumente/UniMR/py/harzi.tif")
 woist(1137.05,2,ar)
 #77,147
-estand(77,147, ar, 100, 200, 1)
+estand(77,147, ar, 100, 200, 855)
 
 
 #%%kufstein
@@ -120,3 +122,4 @@ woist(1593.243042,6,ar)
 #unteranderem 2611,2998 "Mittagskogel" (1595m)
 estand(2611,2998,ar,100, 10, 50)
 #%%
+1137.5 - 856
