@@ -8,6 +8,7 @@ Created on Sat Jan 27 18:23:49 2018
 import math
 import gdal, ogr, osr, os
 import numpy as np
+import time
 
 #%%
 # nach https://pcjericks.github.io/py-gdalogr-cookbook/raster_layers.html#replace-no-data-value-of-raster-with-new-value
@@ -78,10 +79,13 @@ def prominenz(start, ar, dwn_stp):
     gipfel = False
     while gipfel == False:
         fillv = fillv - dwn_stp
-        print(fillv)        
+        print(fillv)
+        t1 = time.clock()        
         gval = canigo_fill(start, ar, fillv, startval)
         start = gval[1]
         gipfel = gval[0]
+        t2 = time.clock()
+        print(t2-t1)
     return(fillv, gval[1])
 
 #%%
@@ -145,14 +149,18 @@ def eigenstand(h, d, p):
   
 #%%
 def estand(y,x,ar,step,res, dwn_stp):
+    t1=time.clock()
     h = float(ar[y][x])
     print("start dom")
     d = dominanzB(y,x,ar,step,res)
-    print("start prom")
+    t3 = time.clock()
+    print("dauer ", t3-t1, "start prom")
     p1 = prominenz([(y,x)], ar, dwn_stp)
     p = h-p1[0]
-    print("hoehe: ", h, "dominanz: ", d, "prominenz: ", p)
-    print("eigenstand: ", eigenstand(h,d,p))
+    t4 = time.clock()
+    print("dauer: ", t4-t3, "hoehe: ", h, "dominanz: ", d, "prominenz: ", p)
+    t2=time.clock()
+    print("eigenstand: ", eigenstand(h,d,p), "in:", (t2-t1)/3600," stunden")
     return(eigenstand(h,d,p), p1[1])
 #%%
     
@@ -168,25 +176,23 @@ def estand(y,x,ar,step,res, dwn_stp):
 #gipfel = 113,128
 #D:/UniData/py
 #/home/hannes/Dokumente/UniMR/py
-#ar = raster2array("D:/UniData/py/subalpen.tif") 
+#ar = raster2array("D:/UniData/py/raster/subalpen.tif") 
 #%%
 #estand(113,128,ar,10,200,10)  
-
+#hoehe:  2215.197998046875 dominanz:  3492.8498393145956 prominenz:  800.0
+#eigenstand:  2.7689103496323155 in: 0.0006940085095782493  stunden
 
 
 
 #%%############################ brocken #######################################
 #sehr lange
 #harz-brocken
-#D:/UniData/py
+#D:/UniData/py/raster
 #/home/hannes/Dokumente/UniMR/py
-#ar = raster2array("D:/UniData/py/harzi.tif")
-#woist(1137.05,2,ar)
+ar = raster2array("D:/UniData/py/raster/harzi.tif")
+woist(1137.05,2,ar)
 #%%77,147
-#estand(77,147, ar, 530, 200, 10)
-#start dom
-#dominanz:  223070.30281953712
-#start prom
+estand(77,147, ar, 530, 200, 5)
 #hoehe:  1137.050048828125 dominanz:  223070.30281953712 prominenz:  860.0
 #eigenstand:  1.1209809402150823
 # literaturwerte 
@@ -195,7 +201,7 @@ def estand(y,x,ar,step,res, dwn_stp):
 #http://www.peakbagger.com/list.aspx?lid=4343
 #eigenstand(1141  , 223100, 856)
 #1.1232228946111869
-
+#eigenstand(1141,223070,856)
 
 
 
@@ -204,12 +210,13 @@ def estand(y,x,ar,step,res, dwn_stp):
 #kufstein
 #D:/UniData/py
 #/home/hannes/Dokumente/UniMR/py
-ar = raster2array("D:/UniData/py/KU_DGM10.asc")
+ar = raster2array("D:/UniData/py/raster/KU_DGM10.asc")
 #%%
-woist(1787.980957,6,ar)
+#woist(1787.980957,6,ar)
 #zeile: 1934 spalte: 1590
+#
 #%%
-estand(1934,1590,ar,100, 10, 5)
+estand(1934,1590,ar,100, 10, 20)
 
 
 
@@ -264,7 +271,7 @@ estand(1934,1590,ar,100, 10, 5)
 #289.6425
 #woist(398.55371094,8,ar)
 #zeile: 84 spalte: 232
-estand(84,232,ar,1,200,1)
+#estand(84,232,ar,1,200,1)
 #hoehe:  398.5537109375 dominanz:  2236.06797749979 prominenz:  65.0
 #eigenstand:  4.190553333179099
 
