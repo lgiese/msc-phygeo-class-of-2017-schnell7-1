@@ -1,0 +1,143 @@
+---
+title: "Predict Precipitation"
+author: "Laura Giese, Caro Kordges, Alena Schmid"
+date: "30 Januar 2018"
+output: html_document
+---
+***1. calculate prediction via arima ***2. calculate prediction via auto:arima and compare with arima***3. plot results***
+
+
+```{r, echo = TRUE }
+oldw <- getOption("warn")
+options(warn = -1)
+
+input = "C:/Users/Laura/Documents/Uni/Rmsc/Data/datenanalyse/"
+output = "C:/Users/Laura/Documents/Uni/Rmsc/Data/datenanalyse/output/"
+#install.packages("forecast")
+library(forecast)
+
+#vectors for input parameters
+p = c(0:5)
+d = c(0:2)
+q = c(0:5)
+qs = c(0:2)
+ds = c(0:2)
+ps = c(0:2)
+
+#load data
+precip = read.table(file = paste0(input,
+                    "produkt_synop_Terminwerte_20060701_20151231_03164.txt"),
+                    sep = ";", header = T)
+df_pre = data.frame(MESS_DATUM = precip$MESS_DATUM, NIEDERSCHLAGSHOEHE = precip$NIEDERSCHLAGSHOEHE)
+
+head(df_pre)
+#training<-df_pre[1:65779,2]
+
+#aggregate to monthly precipitation data
+df_pre$AGG_JM <- substr(df_pre$MESS_DATUM, 1, 6)
+training <- aggregate(df_pre$NIEDERSCHLAGSHOEHE, by = list(df_pre$AGG_JM), FUN = sum)
+
+#seperate training and test sample
+#DONT RUN
+#df_pre[which((df_pre[,1]$year+1900)==2014),1]
+#test<-df_pre[-df_pre[which((df_pre[,1]$year+1900)==2014, 1:2]
+#training1<-(df_pre[which((df_pre[,1]$year+1900)==2014), 1:2])
+#training2<-(df_pre[which((df_pre[,1]$year+1900)==2015), 1:2])
+#training<-rbind(training1, training2)
+
+train <- training[1:90,]
+test<-training[91:114,]
+colnames(train)<-c("date","precip")
+colnames(test)<-c("date","precip")
+
+###-------------------------------------------###
+###------------------ARIMA--------------------###
+###-------------------------------------------###
+
+# library(forecast)
+parameters<-expand.grid(p = c(0:5),
+                        d = c(0:2),
+                        q = c(0:5),
+                        qs = c(0:2),
+                        ds = c(0:2),
+                        ps = c(0:2))
+
+res_armod <- lapply(seq(nrow(parameters)), function(x){
+arima_mod <- arima(train$precip, 
+                   order = c(parameters$p[x], parameters$d[x], parameters$q[x]),
+                   seasonal= list(order = c(parameters$ps[x], parameters$ds[x], parameters$qs[x])), 
+                   method = "ML")
+pred <- predict(arima_mod, n.ahead = 24)
+#print(pred)
+res_armod <- data.frame(p = parameters$p[x], d = parameters$d[x], q = parameters$q[x],
+           ps = parameters$ps[x], ds = parameters$ds[x], qs = parameters$qs[x],
+           rmse = sqrt(mean((pred$pred - test$precip)^2)))
+})
+
+res_armod_stat<-unlist(res_armod)
+res_armod_df <- data.frame(p = res_armod_stat[(which(names(res_armod_stat[])== "p"))],
+                d = res_armod_stat[(which(names(res_armod_stat[])== "d"))],
+                q = res_armod_stat[(which(names(res_armod_stat[])== "q"))],
+                ps = res_armod_stat[(which(names(res_armod_stat[])== "ps"))],
+                ds = res_armod_stat[(which(names(res_armod_stat[])== "ds"))],
+                qs = res_armod_stat[(which(names(res_armod_stat[])== "qs"))],
+                rmse = res_armod_stat[(which(names(res_armod_stat[])== "rmse"))])
+head(res_armod_df)
+
+###-----------------------------------------------------------------------------------###
+###------------------comparision ARIMA with AUTO_ARIMA via RMSE & AIC-----------------###
+###-----------------------------------------------------------------------------------###
+
+# best prediction model from arima = model with min(RMSE)
+best_par <- res_armod_df[min(res_armod_df$rmse),]
+
+best_mod <- arima(train$precip, 
+                  order = c(best_par$p,best_par$d,best_par$q),
+                  seasonal = list(order = c(best_par$ps, best_par$ds, best_par$qs)),
+                  method = "ML")
+best_predict <- predict(best_mod, n.ahead = 24)
+
+#create time series (ts format) & calculate best model with arima_mod
+train_ts <- ts(train$precip, start = c(2006, 7), end = c(2013, 12), 
+               frequency = 12)
+
+autoar_mod <- auto.arima(train_ts, max.p = 5, max.d = 2, max.q = 5, 
+                        stationary = TRUE, seasonal = TRUE)                        
+
+##print parameters and rmse & aic####
+best_par$aic <- best_mod$aic
+autoar_par = data.frame(p = 2, d = 0, q = 2, ps = "NA", ds = "NA", qs = "NA", rmse = summary(autoar_mod)[2], aic = autoar_mod$aic)
+res_par<-rbind(best_par, autoar_par)
+rownames(res_par)<-c("arima", "autoarima")
+
+print(res_par)
+
+###-----------------------------------------------------------------------------------###
+###-----------------------------------plot results------------------------------------###
+###-----------------------------------------------------------------------------------###
+
+#create time series (ts format)
+obs_ts <- ts(test$precip, start = c(2014, 1), end = c(2015, 12), 
+              frequency = 12)
+predarima_ts <- ts(best_predict$pred, start = c(2014, 1), end = c(2015, 12), 
+                frequency = 12)
+predarima_se_ts <- ts(best_predict$se, start = c(2014, 1), end = c(2015, 12), 
+                frequency = 12)
+
+#predicted by arima
+plot(obs_ts, col = "red", type = "l", main = "arima p=3 d=1 q=1, ps=pd=pq=0, red=obs, black=pred, blue=+/-se", ylab = "precipitation")
+lines(predarima_ts, col = "black")
+lines(predarima_ts-predarima_se_ts, col ="blue", type ="l")
+lines(predarima_ts+predarima_se_ts, col ="blue", type ="l")
+
+
+#predicted by auto.arima
+#tsdiag(autoar_mod)
+plot(forecast(autoar_mod), main = "auto.arima p=2 d=0 q=2, ps=pd=pq=NA, blue=pred, red=obs")
+lines(obs_ts, col = "red")
+
+options(warn = oldw)
+```
+Describe Differences: 
+The Difference in RSME- and AIC-values are negligible small (ARIMA prediction is a bit worse than auto:arima) but the plot shows that the auto.arima prediction is closer to the observed precipitation time series.
+
