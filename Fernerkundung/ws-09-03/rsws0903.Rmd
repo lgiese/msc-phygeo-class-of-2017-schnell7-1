@@ -1,0 +1,169 @@
+---
+title: "rms w 09 3"
+author: "giesela jschnell aschmid"
+date: "2 Februar 2018"
+output: html_document
+---
+
+```{r, echo = T, eval=FALSE}
+Skript for pixel based LandCoverClassification with carrot and gpm
+pushed by Laura Giese, Johannes Schnell, Alena Schmid 
+
+#--------------------------------------workflow----------------------------------------#
+1. extract polygone fields per raster cell
+2. create comprehensive data set
+3. define meta information & create gpm object
+4. create resamples and split data into test & training
+5. model tuning & feature selection
+6. test variable importance
+7. compute kappa
+
+#--------------------------------------------------------------------------------------#
+
+library(caret)
+install.packages("C:/Users/Laura/Documents/R/win-library/3.4/gpmm", repos = NULL, type="source")
+library(raster)
+library(rgdal)
+library(maptools)
+library(png)
+
+
+# rs-ws-09-2
+
+# ---------------------------------------------------
+if(Sys.info()["sysname"] == "Windows"){
+  filepath_base <- "C:/Users/Laura/Documents/Uni/Fernerkundung/Daten/w091/input"
+} else {
+  filepath_base <- "C:/Users/Laura/Documents/Uni/Fernerkundung/Daten/w091"
+}
+
+filepath_base <- "C:/Users/Laura/Documents/Uni/Fernerkundung/Daten/w091/"
+path_data <- paste0(filepath_base, "input/")
+path_csv <- paste0(path_data, "csv/")
+path_rdata <- paste0(path_data, "rdata/")
+path_scripts <- paste0(filepath_base)
+path_temp <- paste0(filepath_base, "temp/")
+# ---------------------------------------------------
+
+
+# Load raster and trainingsshape and extract polygone fields ---------------------------#
+#---------------------------------------------------------------------------------------#
+
+muf_lc_ta_segm_fields_nincl <- readOGR("C:/Users/Laura/Documents/Uni/Fernerkundung/Daten/w091/input/rdata/lcc_training_areas_20180126.shp")
+muf_lc_ta_segm_fields_nincl$Type
+
+x <- list.files(paste0(path_rdata), pattern = ".tif$", full.names = TRUE, recursive = TRUE)
+muf = stack(x)
+plot(muf)
+
+#change projection----------------------------------------------------------------------------------------#
+muf@crs@projargs<- c("+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0+units=m +no_defs")
+
+re <- setValues(muf[[1]], seq(ncell(muf[[1]])))
+re_fields_nincl <- extract(re, muf_lc_ta_segm_fields_nincl)
+
+muf_lc_ta_segm_fields_nincl_df <- 
+  lapply(seq(length(muf_lc_ta_segm_fields_nincl)), function(i){
+    data.frame(LCC_ID = muf_lc_ta_segm_fields_nincl@data$id[i],
+               LCC_NAME = muf_lc_ta_segm_fields_nincl@data$LN[i],
+               PIXEL = re_fields_nincl[[i]])
+  })
+muf_lc_ta_segm_fields_nincl_df <- do.call("rbind", muf_lc_ta_segm_fields_nincl_df)
+saveRDS(muf_lc_ta_segm_fields_nincl_df, 
+        file = paste0(path_data, "muf_lc_ta_segm_fields_nincl_df.rds"))
+
+raVals <- 
+  summary(muf_lc_ta_segm_fields_nincl_df)
+
+muf_lc_ta_segm_df <- rbind(muf_lc_ta_segm_fields_nincl_df)
+
+# Extract raster information-------------------------------------------------------------------------------#
+names_muf <- names(muf)
+muf_lc_ta_segm_traindata <- muf_lc_ta_segm_df
+for(i in seq(nlayers(muf))){
+  muf_lc_ta_segm_traindata <- cbind(muf_lc_ta_segm_traindata, 
+                                    muf[[i]][muf_lc_ta_segm_traindata$PIXEL])
+  colnames(muf_lc_ta_segm_traindata)[i+3] <- names_muf[i]
+}
+
+#------------save data------------------------------------------------------------------------------------#
+saveRDS(muf_lc_ta_segm_traindata, file = paste0(path_data,"muf_lc_ta_segm_traindata.rds"))
+
+summary(muf_lc_ta_segm_traindata)
+muf_lc_ta_segm_traindata
+
+
+writeOGR(muf_lc_ta_segm_traindata, paste0(path_temp, "muf_lc_ta_segm_traindata_1.shp"), 
+         driver = "ESRI Shapefile", overwrite = T)
+write.table(muf_lc_ta_segm_traindata, paste0(path_temp, "muf_lc_ta_segm_traindata_1.txt"))
+write.table(muf_lc_ta_segm_fields_nincl_df, paste0(path_temp, "muf_lc_ta_segm_fields_nincl_df.txt"))
+
+#----------------------------------------------------------------------------------------------------------#
+#-----------------------------------------TRAINING AND VALIDATION------------------------------------------#
+#----------------------------------------------------------------------------------------------------------#
+
+#prepare data
+obsv <- readRDS(file = paste0(path_data, "muf_lc_ta_segm_traindata.rds"))
+obsv <- obsv[which(obsv$LCC_NAME %in% names(table(obsv$LCC_NAME)[table(obsv$LCC_NAME) > 100])),]
+
+obsv <- obsv[complete.cases(obsv),]
+
+obsv$LCC_NAME <- as.factor(obsv$LCC_NAME)
+
+#define meta information & create gpm object----------------------------------------------------#
+col_selector <- which(names(obsv) == "LCC_NAME")
+col_meta <- NULL
+col_lc <- which(names(obsv) == "LCC_NAME")
+col_precitors <- seq(4:10)
+
+meta <- createGPMMeta(obsv, type = "input",
+                      selector = col_selector, 
+                      response = col_lc, 
+                      predictor = col_precitors, 
+                      meta = col_meta)
+
+obsv <- gpm(obsv, meta, scale = FALSE)
+
+#highly correlating?
+#clean_pred <- cleanPredictors(x = obsv[4:10], nzv = TRUE, 
+#                            highcor = TRUE, cutoff = 0.80)
+
+#create resamples and split data into test & training-------------------------------------------------------------------#
+obsv <- resamplingsByVariable(x = obsv,
+                              use_selector = FALSE,
+                              resample = 5, 
+                              grabs = 50)
+
+# Split resamples into training and testing samples
+obsv <- splitMultResp(x = obsv, 
+                      p = 0.65, 
+                      use_selector = FALSE)
+
+#model tuning & feature selection---------------------------------------------------------------------------------------#
+memory.limit(6000000)
+
+obsv <- trainModel(x = obsv,
+                   n_var = NULL, 
+                   mthd = "rf",
+                   mode = "rfe",
+                   seed_nbr = 11, 
+                   cv_nbr = 5,
+                   var_selection = "indv", 
+                   filepath_tmp = NULL)
+
+#test variable importance-----------------------------------------------------------------------------------------------#
+var_imp <- compVarImp(obsv@model$rf_rfe, scale = FALSE)
+var_imp_scale <- compVarImp(obsv@model$rf_rfe, scale = TRUE)
+
+plotVarImp(var_imp)
+
+#compute kappa----------------------------------------------------------------------------------------------------------#
+tstat <- compContTests(obsv@model$rf_rfe, mean = TRUE)
+tstat[[1]]["Kappa_mean"]
+
+#result-----------------------------------------------------------------------------------------------------------------#
+still waiting for result
+trainModel function still running
+
+```
+

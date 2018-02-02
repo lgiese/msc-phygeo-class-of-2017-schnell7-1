@@ -205,7 +205,7 @@ def estand(y,x,ar,step,res, dwn_stp):
 ar = raster2array("D:/UniData/py/raster/harzi.tif")
 woist(1137.05,2,ar)
 #%%77,147
-estand(77,147, ar, 530, 200, 100)
+estand(77,147, ar, 530, 200, 128)
 #hoehe:  1137.050048828125 
 #dominanz:  223070.30281953712 dauer  102 sek
 #prominenz:  860.0

@@ -28,7 +28,7 @@ def bestimmung_cfill(start,ar, st):
 def canigo(start, ar, fill, startval):
     kennichschon=start[:]
     neu=start[:]
-    #neustart=start
+    neustart=start
     while len(neu) > 0:
         neu=[]
         for st in range(len(start)):
@@ -51,9 +51,9 @@ def canigo(start, ar, fill, startval):
         #print(len(neu), len(kennichschon), len(start))
     else:
         #print("kein weiterer Gipfel")
-        #start = neustart
-        #return(False, start, fill)
-        return(False, kennichschon, fill)        
+        start = neustart
+        return(False, start, fill)
+        #return(False, kennichschon, fill)        
 
 #%%
 
