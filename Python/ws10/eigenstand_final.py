@@ -70,9 +70,9 @@ def canigo_fill(start, ar, fill, startval):
         #print(len(neu), len(kennichschon), len(start))
     else:
         #print("kein weiterer Gipfel")
-        #return(False, kennichschon)
-        start = neustart
-        return(False, start)        
+        return(False, kennichschon)
+        #start = neustart
+        #return(False, start)        
 
 #%%
 def prominenz(start, ar, dwn_stp):
@@ -224,7 +224,7 @@ ar = raster2array("D:/UniData/py/raster/harz_800.tif")
 #woist(1085.3502,4,ar)
 #zeile: 19 spalte: 36
 #%%
-estand(19,36, ar, 25, 800, 128)
+estand(19,36, ar, 25, 800, 20)
 #%%
 hoehe:  1085.3502197265625 dominanz:  223442.1625387653 prominenz:  800.0
 eigenstand:  1.1557598268199942 in: 0.015637430981284728  stunden
@@ -346,7 +346,7 @@ estand(420,154, ar, 50, 200, 128)
 #taunus-winterstein 
 #woist(509.52810669, 8, ar)
 #zeile: 367 spalte: 227
-#estand(367,227, ar, 1, 200, 128)
+estand(367,227, ar, 1, 200, 1)
 #hoehe:  509.5281066894531 dominanz:  10065.783625729295 prominenz:  164.0
 #eigenstand:  3.02201742314082
 #http://www.thehighrisepages.de/bergtouren/na_tauns.htm
@@ -357,7 +357,7 @@ estand(420,154, ar, 50, 200, 128)
 #267.4231
 #woist(267.4231,4,ar)
 #zeile: 344 spalte: 247
-estand(344,247,ar,1,200,128)
+estand(344,247,ar,1,200,1)
 #hoehe:  267.423095703125 dominanz:  3000.0 prominenz:  23.0
 #eigenstand:  4.548822467743755
 #
