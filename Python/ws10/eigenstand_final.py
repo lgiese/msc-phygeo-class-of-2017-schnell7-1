@@ -290,7 +290,7 @@ eigenstand:  1.1266055464032145 in: 0.009963159426572221  stunden
 hoehe:  1137.050048828125 dominanz:  223331.59203301265 prominenz:  846.0
 eigenstand:  1.1288739390382525 in: 0.018778400191671003  stunden
 
-mit richtiger hoehe p = 852
+
 
 
 
