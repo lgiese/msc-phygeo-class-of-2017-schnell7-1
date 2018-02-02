@@ -47,7 +47,7 @@ def bestimmung_cfill(start,ar, st):
 def canigo_fill(start, ar, fill, startval):
     kennichschon=start[:]
     neu=start[:]
-    #startval=start[0]
+    #neustart=start
     while len(neu) > 0:
         neu=[]
         for st in range(len(start)):
@@ -66,11 +66,13 @@ def canigo_fill(start, ar, fill, startval):
                 start.append((neu[i][0], neu[i][1]))
                 start = list(set(start))
         kennichschon = kennichschon + start
-        kennichschon = list(set(kennichschon))
+        #kennichschon = list(set(kennichschon))
         #print(len(neu), len(kennichschon), len(start))
     else:
         #print("kein weiterer Gipfel")
-        return(False, kennichschon)        
+        #return(False, kennichschon)
+        start = neustart
+        return(False, start)        
 
 #%%
 def prominenz(start, ar, dwn_stp):
@@ -203,7 +205,7 @@ def estand(y,x,ar,step,res, dwn_stp):
 ar = raster2array("D:/UniData/py/raster/harzi.tif")
 woist(1137.05,2,ar)
 #%%77,147
-estand(77,147, ar, 530, 200, 128)
+estand(77,147, ar, 530, 200, 100)
 #hoehe:  1137.050048828125 
 #dominanz:  223070.30281953712 dauer  102 sek
 #prominenz:  860.0
