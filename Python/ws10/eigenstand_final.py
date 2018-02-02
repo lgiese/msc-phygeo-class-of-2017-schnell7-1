@@ -56,7 +56,7 @@ def canigo_fill(start, ar, fill, startval):
                 for x in range(b[2], b[3]):
                     if ar[y][x] > ar[startval[0]][startval[1]]:
                         #print("groesseren Punkt gefunden")
-                        return(True,(startval[0],startval[1]))
+                        return(True,(y,x))
                     if ar[y][x] > fill:
                         neu.append((y,x))
                         neu = list(set(neu))
@@ -325,6 +325,9 @@ estand(64,54,ar,50,300,10)
 #eigenstand:  3.191536879728998 in: 2.0505617146658512e-05  stunden
 #http://www.gipfelseiten.de/gipfel.php?gipfel=frechjoch
 #dominanz auf 10er raster:  2567.1969149249144
+#%%
+eigenstand(1787, 2567, 410)
+#3.2384761548635517
 #%%############################# taunus #######################################
 #6std
 #taunus-gr feldberg
