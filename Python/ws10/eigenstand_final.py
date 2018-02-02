@@ -271,7 +271,7 @@ eigenstand:  1.13805604800014 in: 0.08232859853469159  stunden
 hoehe:  1107.0989990234375 dominanz:  223684.95702661815 prominenz:  822.0
 eigenstand:  1.1427136955176749 in: 0.16057810848656826  stunden
 
-wieder falsche hoehe; mit richtiger p=856 , das ist der literaturwert
+wieder falsche hoehe; mit richtiger p=856 
 
 
 #%%################################################################################################################
