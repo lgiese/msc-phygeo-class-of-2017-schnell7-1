@@ -314,7 +314,17 @@ ar = raster2array("D:/UniData/py/raster/KU_DGM10.asc")
 estand(1934,1590,ar,100, 10, 20)
 
 
-
+#%%
+ar = raster2array("D:/UniData/py/raster/ku_300.tif")
+#%%
+woist(1735.495, 3, ar)
+#zeile: 64 spalte: 54
+#%%
+estand(64,54,ar,50,300,10)
+#hoehe:  1735.495 dominanz:  2830.194339616981 prominenz:  410.0
+#eigenstand:  3.191536879728998 in: 2.0505617146658512e-05  stunden
+#http://www.gipfelseiten.de/gipfel.php?gipfel=frechjoch
+#dominanz auf 10er raster:  2567.1969149249144
 #%%############################# taunus #######################################
 #6std
 #taunus-gr feldberg
@@ -322,7 +332,7 @@ estand(1934,1590,ar,100, 10, 20)
 #/home/hannes/Dokumente/UniMR/py
 ar = raster2array("D:/UniData/py/raster/taunus.tif")
 #woist(875.4925,4,ar)
-#%%420,154
+##%%420,154
 estand(420,154, ar, 50, 200, 128)
 #%%
 #hoehe:  875.4924926757812 dominanz:  101482.01811158466 prominenz:  670.0
